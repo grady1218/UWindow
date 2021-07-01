@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace AutoResizer
 {
     public static class Program
     {
+        static string version = "v1.0";
         static GetWindow getWindow;
         static OperationWindow operationWindow;
         /// <summary>
@@ -19,10 +21,43 @@ namespace AutoResizer
 
         static void Main(string[] args)
         {
+            CheckUpdate();
             Processes = new List<Process>();
-            Task.Run( StartupApp );
-            getWindow = new GetWindow( "umamusume" );
-            operationWindow = new OperationWindow( getWindow.HWND );
+            Task.Run(StartupApp);
+            getWindow = new GetWindow("umamusume");
+            operationWindow = new OperationWindow(getWindow.HWND);
+        }
+
+        static void CheckUpdate()
+        {
+            using (var client = new HttpClient())
+            {
+                var req = new HttpRequestMessage( HttpMethod.Get, "https://api.github.com/repos/grady1218/UWindow/releases");
+                req.Headers.Add( "user-agent", "cs" );
+
+                var res = client.SendAsync(req);
+                var body = res.Result.Content.ReadAsStringAsync().Result.Split(',');
+                var url = "";
+
+                foreach( var text in body )
+                {
+
+                    url = text.Contains("html_url") && url == "" ? text.Substring(text.IndexOf(':') + 1) : url;
+                    
+                    if (text.Contains("tag_name"))
+                    {
+                        if (!text.Contains(version))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine( $"更新があります\n{url}" );
+                            Console.ResetColor();
+
+                            Process.Start(url);
+                        }
+                        return;
+                    }
+                }
+            }
         }
 
         /// <summary>
