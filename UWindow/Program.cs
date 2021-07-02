@@ -11,9 +11,10 @@ namespace AutoResizer
 {
     public static class Program
     {
-        static string version = "v1.0";
+        static string version = "v1.1";
         static GetWindow getWindow;
         static OperationWindow operationWindow;
+        static WindowSize windowSize;
         /// <summary>
         /// StartupAppで起動したプロセスのリスト
         /// </summary>
@@ -21,11 +22,19 @@ namespace AutoResizer
 
         static void Main(string[] args)
         {
+            windowSize = WindowSize.LoadFile();
+
+            SetWindowSize();
             CheckUpdate();
             Processes = new List<Process>();
             Task.Run(StartupApp);
             getWindow = new GetWindow("umamusume");
             operationWindow = new OperationWindow(getWindow.HWND);
+        }
+
+        static void SetWindowSize()
+        {
+            if( File.Exists( "./" ) )
         }
 
         static void CheckUpdate()

@@ -44,5 +44,7 @@ namespace AutoResizer
         public static extern IntPtr GetActiveWindow();
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
     }
 }
