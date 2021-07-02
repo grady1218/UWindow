@@ -31,7 +31,6 @@ namespace AutoResizer
             var s = new System.Xml.Serialization.XmlSerializer(typeof(WindowSize));
             using (var sw = new StreamWriter("Size.xml", false, new System.Text.UTF8Encoding(false)))
             {
-                Console.WriteLine( window.Console );
                 s.Serialize(sw, window);
                 return true;
             }

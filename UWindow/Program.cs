@@ -25,9 +25,6 @@ namespace AutoResizer
             Processes = new List<Process>();
             WindowSize = WindowSize.LoadFile();
 
-            Console.WriteLine(WindowSize.Console);
-
-
             if (WindowSize.Console.Width != 0) WAPI.SetWindowPos(WAPI.GetConsoleWindow(), IntPtr.Zero,
                                                             WindowSize.Console.X, WindowSize.Console.Y,
                                                             WindowSize.Console.Width, WindowSize.Console.Height, 0);
