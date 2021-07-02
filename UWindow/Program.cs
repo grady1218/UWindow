@@ -23,18 +23,11 @@ namespace AutoResizer
         static void Main(string[] args)
         {
             windowSize = WindowSize.LoadFile();
-
-            SetWindowSize();
             CheckUpdate();
             Processes = new List<Process>();
             Task.Run(StartupApp);
             getWindow = new GetWindow("umamusume");
             operationWindow = new OperationWindow(getWindow.HWND);
-        }
-
-        static void SetWindowSize()
-        {
-            if( File.Exists( "./" ) )
         }
 
         static void CheckUpdate()
