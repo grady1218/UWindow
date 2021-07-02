@@ -31,7 +31,7 @@ namespace AutoResizer
         public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll")]
-        public static extern bool GetWindowRect( IntPtr hwnd, out RECT lp );
+        public static extern bool GetWindowRect( IntPtr hWnd, out RECT lp );
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -41,10 +41,14 @@ namespace AutoResizer
         public static extern int IsWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
+        public static extern IntPtr SetFocus( IntPtr hWnd );
+
+        [DllImport("user32.dll")]
         public static extern IntPtr GetActiveWindow();
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
         [DllImport("kernel32.dll")]
         public static extern IntPtr GetConsoleWindow();
+        
     }
 }

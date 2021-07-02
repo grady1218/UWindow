@@ -6,15 +6,17 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace AutoResizer
 {
     public static class Program
     {
+        public static WindowSize WindowSize;
+
         static string version = "v1.1";
         static GetWindow getWindow;
         static OperationWindow operationWindow;
-        static WindowSize windowSize;
         /// <summary>
         /// StartupAppで起動したプロセスのリスト
         /// </summary>
@@ -22,9 +24,17 @@ namespace AutoResizer
 
         static void Main(string[] args)
         {
-            windowSize = WindowSize.LoadFile();
-            CheckUpdate();
             Processes = new List<Process>();
+            WindowSize = WindowSize.LoadFile();
+
+            Console.WriteLine(WindowSize.Console);
+
+
+            if (WindowSize.Console.Width != 0) WAPI.SetWindowPos(WAPI.GetConsoleWindow(), IntPtr.Zero,
+                                                            WindowSize.Console.X, WindowSize.Console.Y,
+                                                            WindowSize.Console.Width, WindowSize.Console.Height, 0);
+            // CheckUpdate();
+
             Task.Run(StartupApp);
             getWindow = new GetWindow("umamusume");
             operationWindow = new OperationWindow(getWindow.HWND);

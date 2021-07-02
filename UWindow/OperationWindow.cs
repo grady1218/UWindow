@@ -8,19 +8,15 @@ namespace AutoResizer
 	{
 
 		IntPtr HWND;
-		Rectangle _currentVerticalWindowSize;
-		Rectangle _currentHorizontalWindowSize;
 
 		int _time = 100;
 		bool _isEdit = false;
-		public OperationWindow( IntPtr hwnd )
+		public OperationWindow(IntPtr hwnd)
 		{
 			HWND = hwnd;
 
-			LoadPosition();
-
-			Task task1 = Task.Run( WaitKeyInput );
-			Task mainLoop = Task.Run( SetWindowSize );
+			Task task1 = Task.Run(WaitKeyInput);
+			Task mainLoop = Task.Run(SetWindowSize);
 
 			mainLoop.Wait();
 
@@ -28,20 +24,20 @@ namespace AutoResizer
 
 		private async Task WaitKeyInput()
 		{
-			while(true)
+			while (true)
 			{
 				string str = Console.ReadLine();
 				if (str != "")
 				{
 					Operation(str)();
 				}
-				await Task.Delay( 100 );
+				await Task.Delay(100);
 			}
 		}
 
 		private Action Operation(string op)
 		{
-			switch(op)
+			switch (op)
 			{
 				case "s":
 				case "save": return SavePosition;  //  エイリアス
@@ -51,53 +47,28 @@ namespace AutoResizer
 			}
 		}
 
-		private void LoadPosition()
-		{
-			if(System.IO.File.Exists("Vertical.xml"))
-			{
-				var s = new System.Xml.Serialization.XmlSerializer(typeof(Rectangle));
-				using (var sr = new System.IO.StreamReader("Vertical.xml", new System.Text.UTF8Encoding(false)))
-				{
-					_currentVerticalWindowSize = (Rectangle)s.Deserialize( sr );
-				}
-			}
-			else
-			{
-				SavePosition();
-			}
-
-			if (System.IO.File.Exists("Horizontal.xml"))
-			{
-				var s = new System.Xml.Serialization.XmlSerializer(typeof(Rectangle));
-				using (var sr = new System.IO.StreamReader("Horizontal.xml", new System.Text.UTF8Encoding(false)))
-				{
-					_currentHorizontalWindowSize = (Rectangle)s.Deserialize(sr);
-				}
-			}
-		}
-
 		private void SavePosition()
 		{
-			Rectangle rect = GetWindowSize();
+			Rectangle rect = GetWindowSize(HWND);
 			//  ゼロ除算回避
 			string direction = rect.Width / (rect.Height + 1) < 1 ? "Vertical" : "Horizontal";
 			_isEdit = false;
 
-			if (direction == "Vertical") _currentVerticalWindowSize = rect;
-			else _currentHorizontalWindowSize = rect;
+			if (direction == "Vertical") Program.WindowSize.Vertical = rect;
+			else Program.WindowSize.Horizontal = rect;
 
-			var s = new System.Xml.Serialization.XmlSerializer( typeof( Rectangle ) );
-			using (var sw = new System.IO.StreamWriter( $"{direction}.xml", false, new System.Text.UTF8Encoding(false) ))
-			{
-				s.Serialize( sw, rect );
-			}
+			Program.WindowSize.WriteFile();
 
-			Console.WriteLine("現在位置を保存しました");
+			Console.WriteLine("位置を保存しました");
 		}
 
-		private void ChangeWindowPosition() => _isEdit = true;
+		private void ChangeWindowPosition()
+		{
+			_isEdit = true;
+			Console.WriteLine( "変更を受け付けます・・・" );
+		}
 
-		private Rectangle GetWindowSize()
+		private Rectangle GetWindowSize( IntPtr HWND )
 		{
             bool flag = WAPI.GetWindowRect(HWND, out WAPI.RECT rect);
 
@@ -114,27 +85,31 @@ namespace AutoResizer
 				//  もしウィンドウが閉じられていたら関連のアプリを閉じる
 				if (WAPI.IsWindow(HWND) == 0)
 				{
-					foreach( var p in Program.Processes )
+					Program.WindowSize.Console = GetWindowSize( WAPI.GetConsoleWindow() );
+					Program.WindowSize.WriteFile();
+
+					foreach ( var p in Program.Processes )
                     {
 						if( !p.HasExited ) p.Kill();
                     }
+
 					Environment.Exit(0);
 				}
 
 				if (!_isEdit && WAPI.GetForegroundWindow() == HWND)
 				{
-					Rectangle rect = GetWindowSize();
+					Rectangle rect = GetWindowSize( HWND );
 					//  ゼロ除算回避
 					string direction = rect.Width / ( rect.Height + 1 ) < 1 ? "Vertical" : "Horizontal";
 
-					if (direction == "Vertical" && _currentVerticalWindowSize != rect && _currentVerticalWindowSize.Width != 0)
+					if (direction == "Vertical" && Program.WindowSize.Vertical != rect && Program.WindowSize.Vertical.Width != 0)
 					{
-						WAPI.SetWindowPos(HWND, IntPtr.Zero, _currentVerticalWindowSize.X, _currentVerticalWindowSize.Y, _currentVerticalWindowSize.Width, _currentVerticalWindowSize.Height, 0);
+						WAPI.SetWindowPos(HWND, IntPtr.Zero, Program.WindowSize.Vertical.X, Program.WindowSize.Vertical.Y, Program.WindowSize.Vertical.Width, Program.WindowSize.Vertical.Height, 0);
 
 					}
-					else if (direction == "Horizontal" && _currentHorizontalWindowSize != rect && _currentHorizontalWindowSize.Width != 0)
+					else if (direction == "Horizontal" && Program.WindowSize.Horizontal != rect && Program.WindowSize.Horizontal.Width != 0)
 					{
-						WAPI.SetWindowPos(HWND, IntPtr.Zero, _currentHorizontalWindowSize.X, _currentHorizontalWindowSize.Y, _currentHorizontalWindowSize.Width, _currentHorizontalWindowSize.Height, 0);
+						WAPI.SetWindowPos(HWND, IntPtr.Zero, Program.WindowSize.Horizontal.X, Program.WindowSize.Horizontal.Y, Program.WindowSize.Horizontal.Width, Program.WindowSize.Horizontal.Height, 0);
 					}
 
 				}

@@ -41,7 +41,6 @@ namespace AutoResizer
             IntPtr pt = IntPtr.Zero;
             WAPI.EnumWindows((h, l) =>
             {
-
                 int textLen = WAPI.GetWindowTextLength(h);
                 if (0 < textLen)
                 {
