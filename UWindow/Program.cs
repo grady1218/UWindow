@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Text;
 
 namespace AutoResizer
 {
@@ -33,7 +31,7 @@ namespace AutoResizer
             if (WindowSize.Console.Width != 0) WAPI.SetWindowPos(WAPI.GetConsoleWindow(), IntPtr.Zero,
                                                             WindowSize.Console.X, WindowSize.Console.Y,
                                                             WindowSize.Console.Width, WindowSize.Console.Height, 0);
-            // CheckUpdate();
+            CheckUpdate();
 
             Task.Run(StartupApp);
             getWindow = new GetWindow("umamusume");
